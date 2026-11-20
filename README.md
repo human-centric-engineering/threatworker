@@ -1,3 +1,28 @@
+# ThreatWorker
+
+ThreatWorker tests web apps for security problems on behalf of the people who own them.
+It maps every API route an app has and who may call it, runs proven open-source scanners
+safely against verified hosts, keeps one record per finding, and proves each fix with a
+re-scan. Built by Human-Centric Engineering.
+
+> ### A fork of Sunrise
+>
+> ThreatWorker is a **leaf-app fork** of the
+> [Sunrise](https://github.com/human-centric-engineering/sunrise) platform, started from
+> `v0.19.0`. It builds on Sunrise through the designed extension seams, and takes each
+> Sunrise release as a merge from the `upstream` remote. Nothing below this note has been
+> rewritten for ThreatWorker yet: it is Sunrise's own README.
+>
+> The plan and design are in [`.context/app/planning/`](./.context/app/planning/):
+> [`app-plan.md`](./.context/app/planning/app-plan.md),
+> [`spec.md`](./.context/app/planning/spec.md) and
+> [`feature-blocks.md`](./.context/app/planning/feature-blocks.md).
+>
+> Local development: `npm run dev` binds port 3019, served as `https://threatworker.test`
+> through the HCE dev proxy.
+
+---
+
 # Sunrise - build production apps faster
 
 A production-ready Next.js 16 starter template designed for rapid application development with AI assistance — now with a complete AI agent orchestration layer baked in.
