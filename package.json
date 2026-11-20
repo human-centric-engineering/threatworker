@@ -138,7 +138,7 @@
     "@sentry/nextjs": "^11.10.0",
     "@tailwindcss/typography": "^0.5.20",
     "@vercel/blob": "^2.8.2",
-    "@xyflow/react": "^12.12.1",
+    "@xyflow/react": "^13.0.2",
     "better-auth": "^1.7.18",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
