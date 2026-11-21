@@ -15,7 +15,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Check, ChevronDown } from 'lucide-react';
-import { apiClient, APIClientError } from '@/lib/api/client';
+import { apiClient } from '@/lib/api/client';
 import { API } from '@/lib/api/endpoints';
 import {
   DropdownMenu,
@@ -24,6 +24,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { SaveError } from '@/components/forms/form-error';
+import { useSaveFailure } from '@/lib/hooks/use-save-failure';
 import type { ShellOrgs } from '@/components/app/shell/shell-orgs';
 
 interface OrgSwitcherProps {
@@ -37,7 +39,7 @@ const BOX =
 export function OrgSwitcher({ orgs }: OrgSwitcherProps): React.ReactElement {
   const router = useRouter();
   const [switchingTo, setSwitchingTo] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const save = useSaveFailure({ fallback: 'Could not switch organisation. Try again.' });
 
   if (!orgs) {
     return <p className={`${BOX} text-muted-foreground`}>Organisation unavailable</p>;
@@ -57,12 +59,12 @@ export function OrgSwitcher({ orgs }: OrgSwitcherProps): React.ReactElement {
 
   async function switchTo(orgId: string): Promise<void> {
     setSwitchingTo(orgId);
-    setError(null);
+    save.clear();
     try {
       await apiClient.post(API.ORGS.SWITCH, { body: { orgId } });
       router.refresh();
     } catch (err) {
-      setError(err instanceof APIClientError ? err.message : 'Could not switch organisation');
+      save.report(err);
     } finally {
       setSwitchingTo(null);
     }
@@ -102,11 +104,7 @@ export function OrgSwitcher({ orgs }: OrgSwitcherProps): React.ReactElement {
           })}
         </DropdownMenuContent>
       </DropdownMenu>
-      {error && (
-        <p role="alert" className="text-destructive text-sm">
-          {error}
-        </p>
-      )}
+      <SaveError failure={save.failure} />
     </div>
   );
 }
