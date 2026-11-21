@@ -1,58 +1,141 @@
-/* app/brand-theme.css
+/* app/brand-theme.css — ThreatWorker's theme.
  *
- * Fork-owned per-surface theming. SHIPS EMPTY — vanilla Sunrise is byte-for-byte
- * unchanged: with no overrides here, every surface inherits app/globals.css's
- * `@theme` defaults. A fork fills this file to repaint one surface (e.g. its
- * consumer-facing pages) while leaving others (e.g. `/admin`) on the platform
- * defaults, including future upstream palette tweaks. No platform layout or page
- * is ever edited — that's the whole point of the seam.
+ * Fork-owned (see .context/ui/surface-theming.md). Values come from the
+ * ThreatWorker design system's tokens.json; change them there first, then here.
  *
- * Imported once in app/layout.tsx AFTER globals.css. Keep these selectors
- * UNLAYERED (no `@layer`): Tailwind 4 emits its `@theme` tokens inside a layer at
- * `:root`, so an unlayered selector here beats them by layer order, and a
- * descendant subtree pin beats the `<html>`-level scope by specificity.
+ * Every surface (admin included) takes the brand: org owners use /admin for
+ * Members, and the design system has no separate admin look (f-app-frame
+ * reconciliation). So the selectors below are `:root`, not `[data-surface=…]`.
  *
- * MECHANISM
- *   proxy.ts classifies each request via `classifySurface(pathname)` and sets the
- *   `x-surface` request header; the root layout puts it on `<html data-surface>`;
- *   `<SurfaceSync>` keeps that attribute correct across client-side navigation.
- *   Because the marker is on `<html>`, body-portaled overlays (Radix dialog /
- *   dropdown / popover / toast, the cookie-consent modal) inherit it too — they
- *   mount at document.body, outside any route-group subtree, which is exactly why
- *   the marker must live at the root and not on a `(group)/layout.tsx`.
+ * Kept UNLAYERED on purpose: Tailwind 4 emits globals.css's `@theme` tokens and
+ * its `.dark` overrides inside layers, and an unlayered rule beats any layered
+ * one, so these win without any specificity games.
  *
- * The two surfaces vanilla Sunrise classifies are `admin` and `consumer`
- * (see lib/app/surface.ts — the policy seam). Redeclare only the tokens you
- * change; everything else inherits, so upstream palette changes flow through the
- * tokens you didn't touch.
- *
- * --------------------------------------------------------------------------
- * EXAMPLE (commented out — uncomment and adjust to brand a surface). Note the
- * TWO dark-mode selector FORMS; they are NOT interchangeable (see the docs):
- *
- *   [data-surface='consumer'] {                 // light, on <html>
- *     --color-primary: #0a1a3a;
- *     --color-background: #fbf6ec;
- *     --color-foreground: #16213d;
- *   }
- *   [data-surface='consumer'].dark {            // dark: `.dark` is on the SAME
- *     --color-primary: #ffc73a;                 // element (<html>) -> COMPOUND
- *     --color-background: #0a1a3a;
- *     --color-foreground: #f2eede;
- *   }
- *
- * For a surface PINNED on a descendant element (a wrapper that sets its own
- * `data-surface`), the dark scope is a DESCENDANT selector instead, because the
- * pin sits below `<html>.dark`:
- *
- *   .dark [data-surface='canvas'] { --color-background: #0a0a0a; ... }
- *
- * And because a pin only re-tokenises its own subtree, an ANCESTOR that frames it
- * (e.g. a `<main>`) still shows the parent surface's background; paint it with
- * `:has()`:
- *
- *   main:has([data-surface='canvas']) { background-color: #ffffff; }
- *
- * See .context/ui/surface-theming.md for all six design constraints.
- * --------------------------------------------------------------------------
+ * Which theme shows is Sunrise's own behaviour (a stored pick, else the device):
+ * the design's "dark-first" default was overruled (f-app-frame decision).
  */
+
+/* Fonts, self-hosted from our own origin so the CSP's `font-src 'self'` holds.
+ * Bricolage takes the optical-size file: the design sets it at opsz 12–96. */
+@import '@fontsource-variable/bricolage-grotesque/opsz.css';
+@import '@fontsource-variable/inter';
+@import '@fontsource-variable/jetbrains-mono';
+
+:root {
+  /* Type */
+  --font-sans: 'Inter Variable', Inter, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, monospace;
+  --font-display: 'Bricolage Grotesque Variable', 'Bricolage Grotesque', system-ui, sans-serif;
+
+  /* Sunrise's tokens, from the design system (light) */
+  --color-background: #ffffff; /* bg */
+  --color-foreground: #1c1c1a; /* text */
+  --color-card: #ffffff; /* surface */
+  --color-card-foreground: #1c1c1a;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #1c1c1a;
+  --color-primary: #ffc933; /* brand: a fill only */
+  --color-primary-foreground: #1c1c1a; /* on-brand */
+  --color-secondary: #f4f3ee; /* surface-raised */
+  --color-secondary-foreground: #1c1c1a;
+  --color-muted: #f4f3ee;
+  --color-muted-foreground: #5e5e58; /* muted */
+  --color-accent: #f4f3ee;
+  --color-accent-foreground: #1c1c1a;
+  --color-destructive: #8a2410; /* sev-high-fg: destructive actions */
+  --color-destructive-foreground: #ffffff;
+  --color-border: #e6e4dc; /* line */
+  --color-input: #cfcdc4; /* line-strong: control borders, 3:1 */
+  --color-ring: #8a5a00; /* link: yellow fails 3:1 as a ring on white */
+
+  /* Design-only tokens, by their design-system names, for ThreatWorker's own
+   * components (use as e.g. `bg-(--color-brand)`). */
+  --color-brand: #ffc933;
+  --color-on-brand: #1c1c1a;
+  --color-brand-tint: #fff4cc;
+  --color-nav: #f4f3ee;
+  --color-surface-raised: #f4f3ee;
+  --color-line-strong: #cfcdc4;
+  --color-text-2: #45453f;
+  --color-link: #8a5a00;
+  --color-proven: #2f6b4f;
+  --color-proven-bg: #e1efe7;
+  --color-sev-critical-fg: #ffffff;
+  --color-sev-critical-bg: #9b1c1c;
+  --color-sev-high-fg: #8a2410;
+  --color-sev-high-bg: #f8d5cb;
+  --color-sev-medium-fg: #7a4510;
+  --color-sev-medium-bg: #fbe6d3;
+  --color-sev-low-fg: #2f4a6b;
+  --color-sev-low-bg: #e4eaf2;
+  --color-sev-info-fg: #45453f;
+  --color-sev-info-bg: #eceae3;
+}
+
+/* `.dark` sits on <html> itself, so this is the compound form. */
+:root.dark {
+  --color-background: #0e1116;
+  --color-foreground: #e6e8ec;
+  --color-card: #161a22;
+  --color-card-foreground: #e6e8ec;
+  --color-popover: #161a22;
+  --color-popover-foreground: #e6e8ec;
+  --color-primary: #ffc933;
+  --color-primary-foreground: #0e1116;
+  --color-secondary: #1e2430;
+  --color-secondary-foreground: #e6e8ec;
+  --color-muted: #1e2430;
+  --color-muted-foreground: #9aa3af;
+  --color-accent: #1e2430;
+  --color-accent-foreground: #e6e8ec;
+  --color-destructive: #ff7a59;
+  --color-destructive-foreground: #0e1116;
+  --color-border: #262c38;
+  --color-input: #3a4252;
+  --color-ring: #ffc933;
+
+  --color-brand: #ffc933;
+  --color-on-brand: #0e1116;
+  --color-brand-tint: #1e1a10;
+  --color-nav: #0b0d12;
+  --color-surface-raised: #1e2430;
+  --color-line-strong: #3a4252;
+  --color-text-2: #b4bac4;
+  --color-link: #ffc933;
+  --color-proven: #3ddc97;
+  --color-proven-bg: #11281f;
+  --color-sev-critical-fg: #ff5c5c;
+  --color-sev-critical-bg: #331517;
+  --color-sev-high-fg: #ff7a59;
+  --color-sev-high-bg: #2e1a16;
+  --color-sev-medium-fg: #ffa45c;
+  --color-sev-medium-bg: #2b2016;
+  --color-sev-low-fg: #6fb3ff;
+  --color-sev-low-bg: #132233;
+  --color-sev-info-fg: #9aa3af;
+  --color-sev-info-bg: #1e2430;
+}
+
+/* Brand yellow is never text on the light theme (design system rule). Sunrise
+ * uses `primary` as a text colour too, so on light those uses take the ochre
+ * link colour instead, while fills stay yellow (owner ruling, t-2). This list
+ * is every form Sunrise uses; tests/unit/app/brand-theme.test.ts fails if a
+ * component starts using one that is not here. */
+:root:not(.dark) .text-primary,
+:root:not(.dark) .\[\&_a\]\:text-primary a {
+  color: var(--color-link);
+}
+:root:not(.dark) .hover\:text-primary:hover,
+:root:not(.dark) .group:hover .group-hover\:text-primary {
+  color: var(--color-link);
+}
+:root:not(.dark) .hover\:text-primary\/80:hover {
+  color: color-mix(in oklab, var(--color-link) 80%, transparent);
+}
+
+/* Display type: page titles and section headings (design: Bricolage 700). */
+.font-display,
+h1,
+h2 {
+  font-family: var(--font-display);
+}
