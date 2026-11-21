@@ -29,7 +29,7 @@
  * Full guide: CUSTOMIZATION.md §4 · lib/protected-nav/types.ts
  */
 import { DEFAULT_PROTECTED_NAV, type ProtectedNavItem } from '@/lib/protected-nav/types';
-import { appAuthLandingLabel, appAuthLandingRoute } from '@/lib/app/auth-landing';
+import { AUTH_LANDING_LABEL, AUTH_LANDING_ROUTE } from '@/lib/auth-landing/route';
 
 /**
  * Authenticated header nav. `null` = platform default; a non-null array replaces it.
@@ -41,6 +41,6 @@ import { appAuthLandingLabel, appAuthLandingRoute } from '@/lib/app/auth-landing
  */
 export const protectedNavItems: ProtectedNavItem[] | null = DEFAULT_PROTECTED_NAV.map((item) =>
   item.href === '/dashboard'
-    ? { ...item, href: appAuthLandingRoute ?? item.href, label: appAuthLandingLabel ?? item.label }
+    ? { ...item, href: AUTH_LANDING_ROUTE, label: AUTH_LANDING_LABEL }
     : item
 );
