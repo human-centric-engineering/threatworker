@@ -161,7 +161,15 @@ export interface AppAlwaysRunTest {
  * ];
  * ```
  */
-export const appAlwaysRunTests: AppAlwaysRunTest[] = [];
+export const appAlwaysRunTests: AppAlwaysRunTest[] = [
+  {
+    path: 'tests/unit/app/brand-theme.test.ts',
+    reason:
+      'reads every file under components/ and app/ for the `text-primary` forms in use and checks ' +
+      'app/brand-theme.css selects each one; a new form in any component should fail it, and no ' +
+      'module graph links that component to the test',
+  },
+];
 
 /**
  * One source file allowed to read `AiWorkflowExecution`, `AiConversation` or

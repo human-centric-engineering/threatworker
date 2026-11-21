@@ -36,10 +36,15 @@ describe('BrandMark default', () => {
   // mocks the seam HOISTED. Driving a brand from here needs doMock +
   // resetModules + re-import, which races the module graph and failed on CI.
 
-  it('renders as a bare string with no wrapper element (byte-for-byte header)', async () => {
+  // ThreatWorker fork: the slot is filled with the canary mark (divergence
+  // ledger row 2). Sunrise's version asserted the scaffold's bare string.
+  it('renders the canary mark as decoration beside the brand name', async () => {
     const container = await renderBrandMark();
-    // No element node is added — just the text node, so the surrounding <Link>
-    // styling is preserved exactly.
-    expect(container.children).toHaveLength(0);
+    const mark = container.querySelector('img');
+    expect(mark).not.toBeNull();
+    expect(mark?.getAttribute('src')).toContain('/brand/threatworker-mark.svg');
+    // Decorative: the wordmark text is the accessible name, so the image adds none.
+    expect(mark?.getAttribute('alt')).toBe('');
+    expect(mark?.getAttribute('aria-hidden')).toBe('true');
   });
 });

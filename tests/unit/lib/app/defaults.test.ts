@@ -649,10 +649,11 @@ const SEAM_DEFAULTS: SeamDefault[] = [
     // file — turning the one row that tells a fork to pin its value into a row
     // that can never fail.
     assert: async () => {
+      // ThreatWorker fork: pinned to its brand (divergence ledger row 1).
       const seam = await vi.importActual<typeof import('@/lib/app/brand')>('@/lib/app/brand');
-      expect(seam.appBrandName).toBeNull();
-      expect(seam.appBrandLegalName).toBeNull();
-      expect(seam.appBrandDescription).toBeNull();
+      expect(seam.appBrandName).toBe('ThreatWorker');
+      expect(seam.appBrandLegalName).toBe('All Too Human Ltd');
+      expect(seam.appBrandDescription).toBe('Find what’s broken. Prove it’s fixed.');
     },
   },
   {
@@ -686,7 +687,8 @@ const SEAM_DEFAULTS: SeamDefault[] = [
     risk: 'a stray coverage exclusion would switch the per-file 80% floor OFF for that path on every install, a stray always-run entry would make every scoped run load a test whose file the install may not even have, and a stray ownerless-surface exception would let a route read rows nobody owns without the policy being asked — the first silences a gate, the second breaks the gate that replaced it, the third exempts a file from the authorization seam',
     assert: () => {
       expect(appCoverageExclusions).toEqual([]);
-      expect(appAlwaysRunTests).toEqual([]);
+      // ThreatWorker fork: pinned to its one always-run test (divergence ledger row 1).
+      expect(appAlwaysRunTests.map((t) => t.path)).toEqual(['tests/unit/app/brand-theme.test.ts']);
       expect(appOwnerlessSurfaceExceptions).toEqual([]);
     },
   },
