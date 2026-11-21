@@ -53,6 +53,22 @@ describe('OrgSwitcher', () => {
     expect(apiClient.post).not.toHaveBeenCalled();
   });
 
+  it('offers a single org the session is not acting in, so the user is not stranded', async () => {
+    vi.mocked(apiClient.post).mockResolvedValue({ activeOrgId: 'only' });
+    const user = userEvent.setup();
+    render(
+      <OrgSwitcher
+        orgs={{ activeOrgId: null, orgs: [{ id: 'only', name: 'Acme', status: 'ACTIVE' }] }}
+      />
+    );
+
+    await user.click(screen.getByRole('button', { name: /no organisation.*switch organisation/i }));
+    await user.click(screen.getByRole('menuitem', { name: /acme/i }));
+
+    expect(apiClient.post).toHaveBeenCalledWith('/api/v1/orgs/switch', { body: { orgId: 'only' } });
+    expect(refresh).toHaveBeenCalledTimes(1);
+  });
+
   it('says the org list could not be loaded, rather than showing none', () => {
     render(<OrgSwitcher orgs={null} />);
     expect(screen.getByText('Organisation unavailable')).toBeInTheDocument();

@@ -7,12 +7,13 @@
  * session cookie with the new org; `router.refresh()` then re-renders the
  * server components, so the shell and the page re-read under that org. A user
  * in one org (every user at `TENANCY_MODE=single`) sees its name and no
- * control, because there is nothing to choose.
+ * control, because there is nothing to choose, unless the session is not
+ * acting in it: then the one org is offered, so the user is never stranded.
  *
  * @see components/app/shell/shell-orgs.ts · app/api/v1/orgs/switch/route.ts
  */
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Check, ChevronDown } from 'lucide-react';
 import { apiClient } from '@/lib/api/client';
@@ -39,6 +40,7 @@ const BOX =
 export function OrgSwitcher({ orgs }: OrgSwitcherProps): React.ReactElement {
   const router = useRouter();
   const [switchingTo, setSwitchingTo] = useState<string | null>(null);
+  const [refreshing, startRefresh] = useTransition();
   const save = useSaveFailure({ fallback: 'Could not switch organisation. Try again.' });
 
   if (!orgs) {
@@ -48,7 +50,8 @@ export function OrgSwitcher({ orgs }: OrgSwitcherProps): React.ReactElement {
   const active = orgs.orgs.find((org) => org.id === orgs.activeOrgId) ?? null;
   const activeName = active?.name ?? 'No organisation';
 
-  if (orgs.orgs.length <= 1) {
+  // Nothing to choose: one org (or none) and the session is already in it.
+  if (orgs.orgs.length === 0 || (orgs.orgs.length === 1 && active)) {
     return (
       <p className={BOX}>
         <span className="sr-only">Organisation: </span>
@@ -57,12 +60,16 @@ export function OrgSwitcher({ orgs }: OrgSwitcherProps): React.ReactElement {
     );
   }
 
+  const switching = switchingTo !== null || refreshing;
+
   async function switchTo(orgId: string): Promise<void> {
     setSwitchingTo(orgId);
     save.clear();
     try {
       await apiClient.post(API.ORGS.SWITCH, { body: { orgId } });
-      router.refresh();
+      // Held as pending until the server components have re-rendered under
+      // the new org, so the trigger never shows the old name as settled.
+      startRefresh(() => router.refresh());
     } catch (err) {
       save.report(err);
     } finally {
@@ -75,11 +82,11 @@ export function OrgSwitcher({ orgs }: OrgSwitcherProps): React.ReactElement {
       <DropdownMenu>
         <DropdownMenuTrigger
           className={`${BOX} focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none`}
-          disabled={switchingTo !== null}
+          disabled={switching}
         >
           <span className="truncate">
             <span className="sr-only">Organisation: </span>
-            {switchingTo ? 'Switching…' : activeName}
+            {switching ? 'Switching…' : activeName}
           </span>
           <ChevronDown aria-hidden="true" className="text-muted-foreground h-4 w-4 shrink-0" />
           <span className="sr-only">, switch organisation</span>

@@ -2,16 +2,19 @@
 
 /**
  * ThreatWorker's signed-in layout: the shell, inside Sunrise's maintenance
- * wrapper, fed the orgs the layout loaded.
+ * wrapper, fed the orgs the layout loaded; and a cookie with no live session
+ * behind it is cleared rather than rendered.
  *
  * @see app/(threatworker)/layout.tsx
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import ThreatWorkerLayout from '@/app/(threatworker)/layout';
 import { loadShellOrgs } from '@/components/app/shell/shell-orgs';
 import type { ShellOrgs } from '@/components/app/shell/shell-orgs';
+import { getServerSession } from '@/lib/auth/utils';
+import { clearInvalidSession } from '@/lib/auth/clear-session';
 
 vi.mock('@/components/maintenance-wrapper', () => ({
   MaintenanceWrapperWithAdminNotice: ({ children }: { children: React.ReactNode }) => (
@@ -27,7 +30,35 @@ vi.mock('@/components/app/shell/app-shell', () => ({
   ),
 }));
 
+vi.mock('@/lib/auth/utils', () => ({ getServerSession: vi.fn() }));
+vi.mock('@/lib/auth/clear-session', () => ({
+  // The real one redirects, which throws; so does this.
+  clearInvalidSession: vi.fn(() => {
+    throw new Error('NEXT_REDIRECT');
+  }),
+}));
+vi.mock('@/lib/auth-landing/route', () => ({
+  AUTH_LANDING_ROUTE: '/threatworker',
+  AUTH_LANDING_LABEL: 'Overview',
+}));
+
+beforeEach(() => {
+  vi.mocked(loadShellOrgs).mockReset();
+  vi.mocked(clearInvalidSession).mockClear();
+  vi.mocked(getServerSession).mockResolvedValue({} as Awaited<ReturnType<typeof getServerSession>>);
+});
+
 describe('ThreatWorkerLayout', () => {
+  it('clears a session cookie with no live session behind it, before loading anything', async () => {
+    vi.mocked(getServerSession).mockResolvedValue(null);
+
+    await expect(ThreatWorkerLayout({ children: <p>Page body</p> })).rejects.toThrow(
+      'NEXT_REDIRECT'
+    );
+    expect(clearInvalidSession).toHaveBeenCalledWith('/threatworker');
+    expect(loadShellOrgs).not.toHaveBeenCalled();
+  });
+
   it('renders the shell inside the maintenance wrapper with the loaded orgs', async () => {
     vi.mocked(loadShellOrgs).mockResolvedValue({
       activeOrgId: 'org-a',

@@ -277,7 +277,15 @@ const SEAM_DEFAULTS: SeamDefault[] = [
   {
     seam: 'lib/app/protected-nav.ts',
     risk: 'a stray non-null list would silently REPLACE the authenticated nav',
-    assert: () => expect(protectedNavItems).toBeNull(),
+    assert: () => {
+      // ThreatWorker fork: Dashboard becomes Overview (divergence ledger row 1).
+      expect(protectedNavItems?.map((item) => [item.href, item.label])).toEqual([
+        ['/threatworker', 'Overview'],
+        ['/profile', 'Profile'],
+        ['/settings', 'Settings'],
+        ['/admin', 'Admin'],
+      ]);
+    },
   },
   {
     seam: 'lib/app/auth-landing.ts',

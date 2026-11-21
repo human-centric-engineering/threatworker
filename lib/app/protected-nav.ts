@@ -27,7 +27,16 @@
  *
  * Full guide: CUSTOMIZATION.md §4 · lib/protected-nav/types.ts
  */
-import type { ProtectedNavItem } from '@/lib/protected-nav/types';
+import { DEFAULT_PROTECTED_NAV, type ProtectedNavItem } from '@/lib/protected-nav/types';
 
-/** Authenticated header nav. `null` = platform default; a non-null array replaces it. */
-export const protectedNavItems: ProtectedNavItem[] | null = null;
+/**
+ * Authenticated header nav. `null` = platform default; a non-null array replaces it.
+ *
+ * ThreatWorker: this header only frames the Sunrise pages left in `(protected)`
+ * (Profile, Settings). Its Dashboard link becomes Overview, ThreatWorker's
+ * signed-in home, so leaving Settings never strands a user on Sunrise's stock
+ * dashboard. The rest of the platform list is kept as it stands.
+ */
+export const protectedNavItems: ProtectedNavItem[] | null = DEFAULT_PROTECTED_NAV.map((item) =>
+  item.href === '/dashboard' ? { ...item, href: '/threatworker', label: 'Overview' } : item
+);
