@@ -13,7 +13,7 @@ import { render, screen } from '@testing-library/react';
 import ThreatWorkerLayout from '@/app/(threatworker)/layout';
 import { loadShellOrgs } from '@/components/app/shell/shell-orgs';
 import type { ShellOrgs } from '@/components/app/shell/shell-orgs';
-import { getServerSession } from '@/lib/auth/utils';
+import { auth } from '@/lib/auth/config';
 import { clearInvalidSession } from '@/lib/auth/clear-session';
 
 vi.mock('@/components/maintenance-wrapper', () => ({
@@ -30,7 +30,8 @@ vi.mock('@/components/app/shell/app-shell', () => ({
   ),
 }));
 
-vi.mock('@/lib/auth/utils', () => ({ getServerSession: vi.fn() }));
+vi.mock('@/lib/auth/config', () => ({ auth: { api: { getSession: vi.fn() } } }));
+vi.mock('next/headers', () => ({ headers: vi.fn(async () => new Headers()) }));
 vi.mock('@/lib/auth/clear-session', () => ({
   // The real one redirects, which throws; so does this.
   clearInvalidSession: vi.fn(() => {
@@ -45,18 +46,29 @@ vi.mock('@/lib/auth-landing/route', () => ({
 beforeEach(() => {
   vi.mocked(loadShellOrgs).mockReset();
   vi.mocked(clearInvalidSession).mockClear();
-  vi.mocked(getServerSession).mockResolvedValue({} as Awaited<ReturnType<typeof getServerSession>>);
+  vi.mocked(auth.api.getSession).mockResolvedValue(
+    {} as Awaited<ReturnType<typeof auth.api.getSession>>
+  );
 });
 
 describe('ThreatWorkerLayout', () => {
   it('clears a session cookie with no live session behind it, before loading anything', async () => {
-    vi.mocked(getServerSession).mockResolvedValue(null);
+    vi.mocked(auth.api.getSession).mockResolvedValue(null);
 
     await expect(ThreatWorkerLayout({ children: <p>Page body</p> })).rejects.toThrow(
       'NEXT_REDIRECT'
     );
     expect(clearInvalidSession).toHaveBeenCalledWith('/threatworker');
     expect(loadShellOrgs).not.toHaveBeenCalled();
+  });
+
+  it('does not clear a live session when the lookup itself fails', async () => {
+    vi.mocked(auth.api.getSession).mockRejectedValue(new Error('database timeout'));
+
+    await expect(ThreatWorkerLayout({ children: <p>Page body</p> })).rejects.toThrow(
+      'database timeout'
+    );
+    expect(clearInvalidSession).not.toHaveBeenCalled();
   });
 
   it('renders the shell inside the maintenance wrapper with the loaded orgs', async () => {

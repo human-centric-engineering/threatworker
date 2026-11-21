@@ -48,7 +48,9 @@ export function OrgSwitcher({ orgs }: OrgSwitcherProps): React.ReactElement {
   }
 
   const active = orgs.orgs.find((org) => org.id === orgs.activeOrgId) ?? null;
-  const activeName = active?.name ?? 'No organisation';
+  // Acting in an org that is not one of the user's own: a support session.
+  const activeName =
+    active?.name ?? (orgs.activeOrgId ? 'Another organisation' : 'No organisation');
 
   // Nothing to choose: one org (or none) and the session is already in it.
   if (orgs.orgs.length === 0 || (orgs.orgs.length === 1 && active)) {

@@ -69,6 +69,13 @@ describe('OrgSwitcher', () => {
     expect(refresh).toHaveBeenCalledTimes(1);
   });
 
+  it('says another organisation, not none, while acting in an org the user is not a member of', () => {
+    render(<OrgSwitcher orgs={{ ...TWO_ORGS, activeOrgId: 'customer-org' }} />);
+    expect(
+      screen.getByRole('button', { name: /another organisation.*switch organisation/i })
+    ).toBeInTheDocument();
+  });
+
   it('says the org list could not be loaded, rather than showing none', () => {
     render(<OrgSwitcher orgs={null} />);
     expect(screen.getByText('Organisation unavailable')).toBeInTheDocument();

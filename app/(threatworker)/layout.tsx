@@ -3,7 +3,8 @@ import { MaintenanceWrapperWithAdminNotice } from '@/components/maintenance-wrap
 import { AppShell } from '@/components/app/shell/app-shell';
 import { loadShellOrgs } from '@/components/app/shell/shell-orgs';
 import { BRAND } from '@/lib/brand';
-import { getServerSession } from '@/lib/auth/utils';
+import { headers } from 'next/headers';
+import { auth } from '@/lib/auth/config';
 import { clearInvalidSession } from '@/lib/auth/clear-session';
 import { AUTH_LANDING_ROUTE } from '@/lib/auth-landing/route';
 
@@ -24,15 +25,20 @@ export const metadata: Metadata = {
  * (a route group alone gates nothing). The proxy only sees that a session
  * cookie exists, so the layout checks the session is real, as Sunrise's
  * protected pages do: an expired or revoked one is cleared and sent to login,
- * where the proxy would otherwise bounce it straight back here. Keeps Sunrise's
- * maintenance wrapper.
+ * where the proxy would otherwise bounce it straight back here.
+ *
+ * It asks better-auth directly rather than through `getServerSession()`, which
+ * turns a failed lookup into null: here that would clear a live session on a
+ * database blip. A lookup that throws reaches the error boundary instead.
+ * The cleared user returns to Overview, not the page they opened; there are no
+ * deeper pages yet to lose. Keeps Sunrise's maintenance wrapper.
  */
 export default async function ThreatWorkerLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await getServerSession();
+  const session = await auth.api.getSession({ headers: await headers() });
   if (!session) {
     clearInvalidSession(AUTH_LANDING_ROUTE);
   }
