@@ -277,14 +277,23 @@ const SEAM_DEFAULTS: SeamDefault[] = [
   {
     seam: 'lib/app/protected-nav.ts',
     risk: 'a stray non-null list would silently REPLACE the authenticated nav',
-    assert: () => expect(protectedNavItems).toBeNull(),
+    assert: () => {
+      // ThreatWorker fork: Dashboard becomes Overview (divergence ledger row 1).
+      expect(protectedNavItems?.map((item) => [item.href, item.label])).toEqual([
+        ['/threatworker', 'Overview'],
+        ['/profile', 'Profile'],
+        ['/settings', 'Settings'],
+        ['/admin', 'Admin'],
+      ]);
+    },
   },
   {
     seam: 'lib/app/auth-landing.ts',
     risk: 'a stray value would send every install somewhere else after login',
     assert: () => {
-      expect(appAuthLandingRoute).toBeNull();
-      expect(appAuthLandingLabel).toBeNull();
+      // ThreatWorker fork: pinned to its signed-in home (divergence ledger row 1).
+      expect(appAuthLandingRoute).toBe('/threatworker');
+      expect(appAuthLandingLabel).toBe('Overview');
     },
   },
   {
@@ -396,7 +405,8 @@ const SEAM_DEFAULTS: SeamDefault[] = [
   {
     seam: 'lib/app/protected-routes.ts',
     risk: 'a stray path would put a public route behind auth on every install',
-    assert: () => expect(appProtectedRoutes).toEqual([]),
+    // ThreatWorker fork: pinned to its signed-in prefix (divergence ledger row 1).
+    assert: () => expect(appProtectedRoutes).toEqual(['/threatworker']),
   },
   {
     seam: 'lib/app/config-health.ts',
@@ -611,8 +621,8 @@ const SEAM_DEFAULTS: SeamDefault[] = [
   {
     seam: 'lib/app/reserved-tiers.ts',
     risk: 'a stray entry would switch OFF the guard that keeps a reserved tier empty — and it is upstream, where core is the only thing that could put a file there, that the guard is the promise rather than a formality',
-    // ThreatWorker fork: pinned to the tier this fork fills (divergence ledger row 1).
-    assert: () => expect(occupiedTiers).toEqual(['.context/app']),
+    // ThreatWorker fork: pinned to the tiers this fork fills (divergence ledger row 1).
+    assert: () => expect(occupiedTiers).toEqual(['components/app', '.context/app']),
   },
   {
     seam: 'lib/app/own-modules.ts',

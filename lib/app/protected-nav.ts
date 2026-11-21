@@ -22,12 +22,25 @@
  * The `next/link` / active-state / admin-filtering glue stays in that platform
  * component, so `adminOnly: true` keeps working on a fork's own items.
  *
- * Boundary-clean: type-only import, so this stays within the `lib/app/**`
- * framework-agnostic boundary.
+ * Boundary-clean as Sunrise ships it: a type-only import. (ThreatWorker
+ * imports the `DEFAULT_PROTECTED_NAV` value and its lucide icons, as the
+ * spread recipe above does; the header that reads this is a client component.)
  *
  * Full guide: CUSTOMIZATION.md §4 · lib/protected-nav/types.ts
  */
-import type { ProtectedNavItem } from '@/lib/protected-nav/types';
+import { DEFAULT_PROTECTED_NAV, type ProtectedNavItem } from '@/lib/protected-nav/types';
+import { AUTH_LANDING_LABEL, AUTH_LANDING_ROUTE } from '@/lib/auth-landing/route';
 
-/** Authenticated header nav. `null` = platform default; a non-null array replaces it. */
-export const protectedNavItems: ProtectedNavItem[] | null = null;
+/**
+ * Authenticated header nav. `null` = platform default; a non-null array replaces it.
+ *
+ * ThreatWorker: this header only frames the Sunrise pages left in `(protected)`
+ * (Profile, Settings). Its Dashboard link becomes Overview, ThreatWorker's
+ * signed-in home, so leaving Settings never strands a user on Sunrise's stock
+ * dashboard. The rest of the platform list is kept as it stands.
+ */
+export const protectedNavItems: ProtectedNavItem[] | null = DEFAULT_PROTECTED_NAV.map((item) =>
+  item.href === '/dashboard'
+    ? { ...item, href: AUTH_LANDING_ROUTE, label: AUTH_LANDING_LABEL }
+    : item
+);
