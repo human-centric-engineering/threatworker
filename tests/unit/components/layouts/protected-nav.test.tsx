@@ -59,13 +59,19 @@ afterEach(() => {
 });
 
 describe('ProtectedNav', () => {
-  it('renders the platform default links when no override is set', async () => {
+  // ThreatWorker fork: pinned to our filled seam, where Dashboard becomes
+  // Overview (divergence ledger row 3).
+  it('renders the fork list from lib/app/protected-nav.ts', async () => {
     asUser();
     vi.resetModules();
     const { ProtectedNav } = await import('@/components/layouts/protected-nav');
     render(React.createElement(ProtectedNav));
 
-    expect(screen.getByRole('link', { name: /dashboard/i })).toHaveAttribute('href', '/dashboard');
+    expect(screen.queryByRole('link', { name: /dashboard/i })).toBeNull();
+    expect(screen.getByRole('link', { name: /overview/i })).toHaveAttribute(
+      'href',
+      '/threatworker'
+    );
     expect(screen.getByRole('link', { name: /profile/i })).toHaveAttribute('href', '/profile');
     expect(screen.getByRole('link', { name: /settings/i })).toHaveAttribute('href', '/settings');
   });
