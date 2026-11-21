@@ -45,8 +45,8 @@
   --color-destructive: #8a2410; /* sev-high-fg: destructive actions */
   --color-destructive-foreground: #ffffff;
   --color-border: #e6e4dc; /* line */
-  --color-input: #cfcdc4; /* line-strong: control borders, 3:1 */
-  --color-ring: #8a5a00; /* link: yellow fails 3:1 as a ring on white */
+  --color-input: #8a887f; /* line-strong: control borders, at least 3:1 (design v2) */
+  --color-ring: var(--color-focus); /* focus: brand yellow fails as a ring on light */
 
   /* Design-only tokens, by their design-system names, for ThreatWorker's own
    * components (use as e.g. `bg-(--color-brand)`). */
@@ -55,7 +55,8 @@
   --color-brand-tint: #fff4cc;
   --color-nav: #f4f3ee;
   --color-surface-raised: #f4f3ee;
-  --color-line-strong: #cfcdc4;
+  --color-line-strong: #8a887f;
+  --color-focus: #8a5a00;
   --color-text-2: #45453f;
   --color-link: #8a5a00;
   --color-proven: #2f6b4f;
@@ -91,15 +92,16 @@
   --color-destructive: #ff7a59;
   --color-destructive-foreground: #0e1116;
   --color-border: #262c38;
-  --color-input: #3a4252;
-  --color-ring: #ffc933;
+  --color-input: #64708a;
+  --color-ring: var(--color-focus);
 
   --color-brand: #ffc933;
   --color-on-brand: #0e1116;
   --color-brand-tint: #1e1a10;
   --color-nav: #0b0d12;
   --color-surface-raised: #1e2430;
-  --color-line-strong: #3a4252;
+  --color-line-strong: #64708a;
+  --color-focus: #ffc933;
   --color-text-2: #b4bac4;
   --color-link: #ffc933;
   --color-proven: #3ddc97;
