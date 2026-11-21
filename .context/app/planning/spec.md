@@ -363,7 +363,8 @@ a closed set of three. The section rate limits apply automatically through `prox
 | `POST /findings/[id]/file`                                  | File to the Hub                                                                  | `f-tracked-fixes`   |
 | `GET`/`POST /schedules`, `PATCH`/`DELETE /schedules/[id]`   | Manage schedules                                                                 | `f-schedules`       |
 
-Signed-in pages (route group `(protected)`) under `app/(protected)/threatworker/`:
+Signed-in pages (route group `(threatworker)`, ThreatWorker's own side-navigation frame) under
+`app/(threatworker)/threatworker/`, served at `/threatworker`:
 Targets, Runs, Findings, Schedules, and a dashboard of open findings by severity and SLA
 breaches.
 
