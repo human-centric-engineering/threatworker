@@ -68,7 +68,8 @@ describe('light-theme text-primary override (app/brand-theme.css)', () => {
     const rules = css.match(/[^{}]*text-primary[^{}]*\{/g) ?? [];
     expect(rules.length).toBeGreaterThan(0);
     for (const rule of rules) {
-      for (const selector of rule.replace('{', '').split(',')) {
+      // Each match ends in the rule's one opening brace (the pattern admits no other).
+      for (const selector of rule.slice(0, -1).split(',')) {
         // :where() keeps the guard at zero specificity, so a variant text colour
         // on the same element (`hover:text-foreground`) still outweighs it.
         expect(selector.trim()).toMatch(/^:where\(:root:not\(\.dark\)\) /);
@@ -81,6 +82,6 @@ describe('light-theme text-primary override (app/brand-theme.css)', () => {
     // never mention the class, or that rule would beat every layered variant.
     const layer = css.match(/@layer utilities\s*\{[\s\S]*?\n\}/)?.[0] ?? '';
     expect(layer).toContain('.text-primary');
-    expect(css.replace(layer, '')).not.toContain('text-primary');
+    expect(css.split(layer).join('')).not.toContain('text-primary');
   });
 });
