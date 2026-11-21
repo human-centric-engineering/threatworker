@@ -64,13 +64,23 @@ describe('light-theme text-primary override (app/brand-theme.css)', () => {
     ).toBe(true);
   });
 
-  it('applies the override on the light theme only', () => {
+  it('applies the override on the light theme only, weighing no more than a utility', () => {
     const rules = css.match(/[^{}]*text-primary[^{}]*\{/g) ?? [];
     expect(rules.length).toBeGreaterThan(0);
     for (const rule of rules) {
       for (const selector of rule.replace('{', '').split(',')) {
-        expect(selector.trim()).toMatch(/^:root:not\(\.dark\) /);
+        // :where() keeps the guard at zero specificity, so a variant text colour
+        // on the same element (`hover:text-foreground`) still outweighs it.
+        expect(selector.trim()).toMatch(/^:where\(:root:not\(\.dark\)\) /);
       }
     }
+  });
+
+  it('sits in the utilities layer, not unlayered above every variant', () => {
+    // The layer block closes on a line of its own; everything outside it must
+    // never mention the class, or that rule would beat every layered variant.
+    const layer = css.match(/@layer utilities\s*\{[\s\S]*?\n\}/)?.[0] ?? '';
+    expect(layer).toContain('.text-primary');
+    expect(css.replace(layer, '')).not.toContain('text-primary');
   });
 });

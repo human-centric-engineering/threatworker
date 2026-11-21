@@ -121,16 +121,25 @@
  * link colour instead, while fills stay yellow (owner ruling, t-2). This list
  * is every form Sunrise uses; tests/unit/app/brand-theme.test.ts fails if a
  * component starts using one that is not here. */
-:root:not(.dark) .text-primary,
-:root:not(.dark) .\[\&_a\]\:text-primary a {
-  color: var(--color-link);
-}
-:root:not(.dark) .hover\:text-primary:hover,
-:root:not(.dark) .group:hover .group-hover\:text-primary {
-  color: var(--color-link);
-}
-:root:not(.dark) .hover\:text-primary\/80:hover {
-  color: color-mix(in oklab, var(--color-link) 80%, transparent);
+/*
+ * Unlike the tokens above, these sit IN the utilities layer, and the theme
+ * guard is wrapped in :where() so it adds no specificity. Each rule then weighs
+ * exactly what the Tailwind utility it repaints weighs and, loading after
+ * globals.css, replaces only that utility. A variant text colour on the same
+ * element (`hover:text-foreground`, `data-[state=active]:…`, `disabled:…`)
+ * outweighs it and still wins, as it does without this file. */
+@layer utilities {
+  :where(:root:not(.dark)) .text-primary,
+  :where(:root:not(.dark)) .\[\&_a\]\:text-primary a {
+    color: var(--color-link);
+  }
+  :where(:root:not(.dark)) .hover\:text-primary:hover,
+  :where(:root:not(.dark)) .group:hover .group-hover\:text-primary {
+    color: var(--color-link);
+  }
+  :where(:root:not(.dark)) .hover\:text-primary\/80:hover {
+    color: color-mix(in oklab, var(--color-link) 80%, transparent);
+  }
 }
 
 /* Display type: page titles and section headings (design: Bricolage 700). */
